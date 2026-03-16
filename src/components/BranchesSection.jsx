@@ -3,7 +3,7 @@ import { BRANCHES } from '../data/branches';
 
 const BranchesSection = () => {
   return (
-    <section id="branches" className="branches-section">
+    <section id="locations" className="branches-section">
       <div className="branches-container">
         <FadeIn>
           <h2 className="branches-title">Visit Our Branches</h2>

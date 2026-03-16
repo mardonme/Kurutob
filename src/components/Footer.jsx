@@ -14,9 +14,8 @@ const Footer = () => {
       <div className="footer-grid">
         {/* COLUMN 1 — Brand */}
         <div className="footer-column">
-          <div className="footer-logo">
-            🍽 KURUTOB
-          </div>
+        <img src="./logo.png" className='footer-logo' alt="KURUTOB Logo" />
+
           <p className="footer-tagline">
             Preserving the rich Tajik culinary heritage since 2010. The authentic taste of our homeland in the heart of Tashkent.
           </p>
@@ -108,12 +107,8 @@ const Footer = () => {
 
         /* COLUMN 1 — Brand */
         .footer-logo {
-          font-family: 'Playfair Display', serif;
-          font-weight: 700;
-          font-size: 18px;
-          letter-spacing: 2px;
-          color: #d4a017;
-          margin-bottom: 16px;
+          height: 50%;
+          width: auto;
         }
 
         .footer-tagline {

@@ -10,8 +10,9 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <a href="#" className="navbar-logo">
-        🍽 KURUTOB
+        <img src="./logo.png" alt="KURUTOB Logo" />
       </a>
+      
 
       <div className={`navbar-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>
         {navLinks.map((link) => (
@@ -72,6 +73,9 @@ const Navbar = () => {
           color: #d4a017;
           text-decoration: none;
         }
+          .navbar-logo img {
+            height: 200px;
+          }
 
         .navbar-right {
           display: flex;

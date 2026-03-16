@@ -123,8 +123,9 @@ const StorySection = () => {
           }
 
           .story-image {
-            height: 300px;
-            aspect-ratio: auto;
+            // height: 300px;
+            // aspect-ratio: auto;
+            display: none;
           }
 
           .chef-emoji {

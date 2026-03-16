@@ -34,20 +34,38 @@ const Hero = () => {
         .hero {
           position: relative;
           min-height: 100vh;
+          height: 100vh;
+          max-height: 900px;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           text-align: center;
           padding: 120px 24px 80px;
-          background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(90, 60, 10, 0.35) 0%, transparent 70%), #0e0d08;
+          background: url('/image.png') no-repeat center center / cover;
           overflow: hidden;
+        }
+
+        .hero::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            135deg,
+            rgba(14, 13, 8, 0.85) 0%,
+            rgba(14, 13, 8, 0.65) 40%,
+            rgba(14, 13, 8, 0.75) 70%,
+            rgba(14, 13, 8, 0.9) 100%
+          );
+          z-index: 1;
         }
 
         .hero-content {
           opacity: 0;
           transform: translateY(20px);
           transition: opacity 1s ease, transform 1s ease;
+          position: relative;
+          z-index: 2;
         }
 
         .hero-content.ready {
@@ -179,7 +197,7 @@ const Hero = () => {
           }
 
           .hero-title {
-            font-size: clamp(56px, 20vw, 100px);
+            font-size: clamp(56px, 18vw, 100px);
           }
 
           .hero-buttons {
