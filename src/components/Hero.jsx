@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const Hero = () => {
+const Hero = ({ onOpenReservation }) => {
   const [heroReady, setHeroReady] = useState(false);
 
   useEffect(() => {
@@ -17,8 +17,8 @@ const Hero = () => {
           Taste of Tajik Traditions — served with modern elegance in the heart of Tashkent.
         </p>
         <div className="hero-buttons">
-          <button className="btn-primary">View Menu</button>
-          <button className="btn-secondary">Order Delivery</button>
+          <button className="btn-primary" onClick={onOpenReservation}>Book a Table</button>
+          <button className="btn-secondary">View Menu</button>
         </div>
       </div>
 

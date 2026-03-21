@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useScrolled } from '../hooks/useScrolled';
 
-const Navbar = () => {
+const Navbar = ({ onOpenReservation }) => {
   const isScrolled = useScrolled();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -28,7 +28,7 @@ const Navbar = () => {
       </div>
 
       <div className="navbar-right">
-        <button className="order-button">Order Now</button>
+        <button className="order-button" onClick={onOpenReservation}>Book a Table</button>
         <button
           className={`hamburger ${mobileMenuOpen ? 'open' : ''}`}
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
