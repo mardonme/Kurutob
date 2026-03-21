@@ -1,34 +1,30 @@
 export const MENU_ITEMS = [
   {
     name: "Traditional Kurutob",
-    price: "$12.69",
+    price: "45 000 so'm",
     desc: "Torn flatbread, yogurt, garden herbs, and traditional toppings.",
     badge: "Signature",
-    bg: "#2a2a1e",
-    accent: "#c8a84b"
+    image: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?q=80&w=800&auto=format&fit=crop"
   },
   {
     name: "Crispy Sambusa",
-    price: "$10.20",
+    price: "38 000 so'm",
     desc: "Flaky oven-fired pastry filled with spiced lamb and spring onions.",
     badge: "Popular",
-    bg: "#1e1a10",
-    accent: "#e07b2a"
+    image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=800&auto=format&fit=crop"
   },
   {
     name: "Classic Plov",
-    price: "$15.09",
+    price: "55 000 so'm",
     desc: "Fragrant long-grain rice, tender lamb, yellow carrots, and cumin.",
     badge: "Chef's Choice",
-    bg: "#1a1a12",
-    accent: "#c8a84b"
+    image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=800&auto=format&fit=crop"
   },
   {
     name: "Steamed Manti",
-    price: "$13.35",
+    price: "48 000 so'm",
     desc: "Thin dough filled with hand-chopped beef and steamed to perfection.",
     badge: "House Special",
-    bg: "#121218",
-    accent: "#c8a84b"
+    image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?q=80&w=800&auto=format&fit=crop"
   }
 ];
