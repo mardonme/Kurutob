@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import Container from './ui/Container';
+import SectionHeader from './ui/SectionHeader';
+import Icon from './ui/Icon';
 import FadeIn from './FadeIn';
 import { GALLERY_IMAGES, CATEGORIES } from '../data/galleryImages';
 
@@ -6,12 +9,16 @@ const GallerySection = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [lightboxImage, setLightboxImage] = useState(null);
 
+  const dialogRef = useRef(null);
+  const lastFocusedRef = useRef(null);
+
   const filteredImages =
     activeCategory === 'all'
       ? GALLERY_IMAGES
-      : GALLERY_IMAGES.filter(img => img.category === activeCategory);
+      : GALLERY_IMAGES.filter((img) => img.category === activeCategory);
 
   const openLightbox = (image) => {
+    lastFocusedRef.current = document.activeElement;
     setLightboxImage(image);
     document.body.style.overflow = 'hidden';
   };
@@ -22,280 +29,423 @@ const GallerySection = () => {
   };
 
   const getNextImage = () => {
-    const currentIndex = filteredImages.findIndex(img => img.id === lightboxImage.id);
+    const currentIndex = filteredImages.findIndex((img) => img.id === lightboxImage.id);
     const nextIndex = (currentIndex + 1) % filteredImages.length;
     setLightboxImage(filteredImages[nextIndex]);
   };
 
   const getPrevImage = () => {
-    const currentIndex = filteredImages.findIndex(img => img.id === lightboxImage.id);
+    const currentIndex = filteredImages.findIndex((img) => img.id === lightboxImage.id);
     const prevIndex = (currentIndex - 1 + filteredImages.length) % filteredImages.length;
     setLightboxImage(filteredImages[prevIndex]);
   };
 
-  const getGridSpan = (span) => {
-    return span === 'large' ? 'span 2' : 'span 1';
-  };
+  // Keyboard support + focus management while the lightbox is open.
+  useEffect(() => {
+    if (!lightboxImage) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeLightbox();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        getPrevImage();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        getNextImage();
+      } else if (e.key === 'Tab') {
+        // Trap focus within the dialog (required for aria-modal).
+        const dialog = dialogRef.current;
+        if (!dialog) return;
+        const focusable = dialog.querySelectorAll(
+          'button, a[href], [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) {
+          e.preventDefault();
+          return;
+        }
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        const active = document.activeElement;
+        if (e.shiftKey) {
+          if (active === first || active === dialog) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else if (active === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Move focus into the dialog when it opens.
+    if (dialogRef.current) {
+      dialogRef.current.focus();
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lightboxImage]);
+
+  // Restore focus to the trigger when the lightbox fully closes.
+  useEffect(() => {
+    if (!lightboxImage && lastFocusedRef.current) {
+      lastFocusedRef.current.focus?.();
+      lastFocusedRef.current = null;
+    }
+  }, [lightboxImage]);
+
+  const activeLabel = CATEGORIES.find((c) => c.id === lightboxImage?.category)?.label;
 
   return (
     <section id="gallery" className="gallery-section">
-      <FadeIn>
-        <div className="gallery-header">
-          <h2 className="gallery-title">Our Gallery</h2>
-          <div className="gallery-underline"></div>
-          <p className="gallery-subtitle">
-            Experience the art of Uzbek cuisine
-          </p>
-        </div>
-      </FadeIn>
+      <span className="glow-accent gallery-glow" aria-hidden="true" />
 
-      <FadeIn>
-        <div className="category-filters">
-          {CATEGORIES.map((category) => (
-            <button
-              key={category.id}
-              className={`filter-btn ${activeCategory === category.id ? 'active' : ''}`}
-              onClick={() => setActiveCategory(category.id)}
-            >
-              {category.label}
-            </button>
-          ))}
-        </div>
-      </FadeIn>
+      <Container size="wide" className="gallery-inner">
+        <FadeIn>
+          <SectionHeader
+            eyebrow="GALLERY"
+            title={<>Our <em>Gallery</em></>}
+            subtitle="Experience the art of Tajik and Central Asian cuisine — from sizzling kitchens to plated craft."
+          />
+        </FadeIn>
 
-      <div className="gallery-grid">
-        {filteredImages.map((image, index) => (
-          <FadeIn key={image.id} delay={index * 50}>
-            <div
-              className={`gallery-item gallery-item--${image.span}`}
-              onClick={() => openLightbox(image)}
-            >
-              <img
-                src={image.src}
-                alt={image.title}
-                className="gallery-image"
-              />
-              <div className="gallery-overlay">
-                <span className="gallery-item-title">{image.title}</span>
-                <span className="gallery-view-btn">View</span>
-              </div>
+        <FadeIn>
+          <div className="gallery-filters" role="group" aria-label="Filter gallery by category">
+            {CATEGORIES.map((category) => {
+              const isActive = activeCategory === category.id;
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  className={`gallery-filter ${isActive ? 'is-active' : ''}`.trim()}
+                  aria-pressed={isActive}
+                  onClick={() => setActiveCategory(category.id)}
+                >
+                  {category.label}
+                </button>
+              );
+            })}
+          </div>
+        </FadeIn>
+
+        {filteredImages.length === 0 ? (
+          <FadeIn>
+            <div className="gallery-empty" role="status">
+              <Icon name="utensils" size={28} className="gallery-empty-icon" />
+              <p className="gallery-empty-text">
+                No images in this category yet. Please check back soon.
+              </p>
             </div>
           </FadeIn>
-        ))}
-      </div>
+        ) : (
+          <div className="gallery-grid">
+            {filteredImages.map((image, index) => (
+              <FadeIn
+                key={image.id}
+                delay={index * 50}
+                className={`gallery-cell gallery-cell--${image.span}`}
+              >
+                <button
+                  type="button"
+                  className="gallery-item"
+                  onClick={() => openLightbox(image)}
+                  aria-label={`View ${image.title}`}
+                >
+                  <img
+                    src={image.src}
+                    alt={image.title}
+                    className="gallery-image"
+                    width={image.span === 'large' ? 800 : 600}
+                    height={image.span === 'large' ? 600 : 450}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <span className="gallery-overlay">
+                    <span className="gallery-item-title">{image.title}</span>
+                    <span className="gallery-view">
+                      View
+                      <Icon name="arrowUpRight" size={14} />
+                    </span>
+                  </span>
+                </button>
+              </FadeIn>
+            ))}
+          </div>
+        )}
+      </Container>
 
       {lightboxImage && (
-        <div className="lightbox" onClick={closeLightbox}>
-          <button className="lightbox-close" onClick={closeLightbox}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
+        <div
+          className="gallery-lightbox"
+          onClick={closeLightbox}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Gallery image: ${lightboxImage.title}`}
+          ref={dialogRef}
+          tabIndex={-1}
+        >
+          <button
+            type="button"
+            className="gallery-lb-close"
+            onClick={closeLightbox}
+            aria-label="Close gallery"
+          >
+            <Icon name="close" size={22} />
           </button>
-          <button className="lightbox-nav lightbox-nav--prev" onClick={(e) => { e.stopPropagation(); getPrevImage(); }}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
+
+          <button
+            type="button"
+            className="gallery-lb-nav gallery-lb-nav--prev"
+            onClick={(e) => {
+              e.stopPropagation();
+              getPrevImage();
+            }}
+            aria-label="Previous image"
+          >
+            <Icon name="chevronLeft" size={28} />
           </button>
-          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+
+          <figure className="gallery-lb-content" onClick={(e) => e.stopPropagation()}>
             <img
               src={lightboxImage.src}
               alt={lightboxImage.title}
-              className="lightbox-image"
+              className="gallery-lb-image"
+              width={1200}
+              height={800}
+              decoding="async"
             />
-            <div className="lightbox-caption">
-              <h3 className="lightbox-title">{lightboxImage.title}</h3>
-              <span className="lightbox-category">
-                {CATEGORIES.find(c => c.id === lightboxImage.category)?.label}
-              </span>
-            </div>
-          </div>
-          <button className="lightbox-nav lightbox-nav--next" onClick={(e) => { e.stopPropagation(); getNextImage(); }}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+            <figcaption className="gallery-lb-caption">
+              <h3 className="gallery-lb-title">{lightboxImage.title}</h3>
+              {activeLabel && <span className="gallery-lb-category">{activeLabel}</span>}
+            </figcaption>
+          </figure>
+
+          <button
+            type="button"
+            className="gallery-lb-nav gallery-lb-nav--next"
+            onClick={(e) => {
+              e.stopPropagation();
+              getNextImage();
+            }}
+            aria-label="Next image"
+          >
+            <Icon name="chevronRight" size={28} />
           </button>
         </div>
       )}
 
       <style jsx>{`
         .gallery-section {
-          padding: 100px 48px;
-          max-width: 1400px;
-          margin: 0 auto;
-          background: linear-gradient(180deg, #000000 0%, #0a0a0a 50%, #000000 100%);
+          position: relative;
+          background: var(--c-bg);
+          padding-block: clamp(64px, 10vw, 128px);
+          overflow: hidden;
         }
 
-        .gallery-header {
-          text-align: center;
-          margin-bottom: 60px;
+        .gallery-inner {
+          position: relative;
+          z-index: 1;
         }
 
-        .gallery-title {
-          font-family: 'Playfair Display', serif;
-          font-size: clamp(36px, 6vw, 56px);
-          margin-bottom: 16px;
-          color: #ffffff;
-          font-weight: 400;
-          letter-spacing: 2px;
+        .gallery-glow {
+          top: -10%;
+          left: 50%;
+          transform: translateX(-50%);
+          width: clamp(320px, 60vw, 760px);
+          height: clamp(320px, 60vw, 760px);
+          opacity: 0.6;
         }
 
-        .gallery-underline {
-          width: 80px;
-          height: 3px;
-          background: linear-gradient(90deg, transparent, #d4af37, transparent);
-          margin: 0 auto 24px;
-        }
-
-        .gallery-subtitle {
-          font-family: 'Jost', sans-serif;
-          font-size: 16px;
-          color: #888888;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-        }
-
-        .category-filters {
+        /* ---------- Filters ---------- */
+        .gallery-filters {
           display: flex;
           justify-content: center;
-          gap: 12px;
-          margin-bottom: 48px;
           flex-wrap: wrap;
+          gap: var(--space-3);
+          margin-bottom: clamp(var(--space-6), 5vw, var(--space-7));
         }
 
-        .filter-btn {
-          padding: 12px 28px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(212, 175, 55, 0.2);
-          color: #a0a0a0;
-          font-family: 'Jost', sans-serif;
-          font-size: 14px;
-          font-weight: 500;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          border-radius: 30px;
-        }
-
-        .filter-btn:hover {
-          background: rgba(212, 175, 55, 0.1);
-          border-color: rgba(212, 175, 55, 0.5);
-          color: #d4af37;
-        }
-
-        .filter-btn.active {
-          background: linear-gradient(135deg, #d4af37, #c9a227);
-          border-color: #d4af37;
-          color: #000000;
+        .gallery-filter {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 44px;
+          padding: 10px 22px;
+          border-radius: var(--radius-pill);
+          border: 1px solid var(--c-border);
+          background: var(--c-surface-1);
+          color: var(--c-text-2);
+          font-family: var(--font-sans);
+          font-size: var(--fs-sm);
           font-weight: 600;
+          letter-spacing: 0.04em;
+          cursor: pointer;
+          transition: color var(--dur) var(--ease),
+            background var(--dur) var(--ease),
+            border-color var(--dur) var(--ease),
+            transform var(--dur) var(--ease);
         }
 
+        .gallery-filter:hover {
+          color: var(--c-gold);
+          border-color: var(--c-gold-line);
+          background: var(--c-gold-soft);
+        }
+
+        .gallery-filter.is-active {
+          background: var(--c-gold);
+          border-color: var(--c-gold);
+          color: var(--c-on-gold);
+        }
+
+        .gallery-filter.is-active:hover {
+          background: var(--c-gold-hover);
+          border-color: var(--c-gold-hover);
+        }
+
+        /* ---------- Empty state ---------- */
+        .gallery-empty {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: var(--space-3);
+          text-align: center;
+          padding: clamp(var(--space-7), 8vw, var(--space-9)) var(--space-5);
+          border: 1px dashed var(--c-border-strong);
+          border-radius: var(--radius-lg);
+          background: var(--c-surface-1);
+        }
+
+        .gallery-empty-icon {
+          color: var(--c-gold);
+        }
+
+        .gallery-empty-text {
+          color: var(--c-text-2);
+          font-size: var(--fs-lg);
+          max-width: 40ch;
+        }
+
+        /* ---------- Bento grid ---------- */
         .gallery-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           grid-auto-rows: 280px;
-          gap: 16px;
+          gap: var(--space-4);
         }
 
-        .gallery-item {
-          position: relative;
-          overflow: hidden;
-          border-radius: 12px;
-          cursor: pointer;
-          border: 1px solid rgba(212, 175, 55, 0.1);
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        .gallery-cell {
+          min-width: 0;
         }
 
-        .gallery-item--large {
+        .gallery-cell--large {
           grid-column: span 2;
           grid-row: span 2;
         }
 
-        .gallery-item--medium {
+        .gallery-cell--medium {
           grid-column: span 1;
           grid-row: span 1;
         }
 
+        .gallery-item {
+          position: relative;
+          display: block;
+          width: 100%;
+          height: 100%;
+          padding: 0;
+          overflow: hidden;
+          border-radius: var(--radius-lg);
+          border: 1px solid var(--c-border);
+          background: var(--c-surface-2);
+          cursor: pointer;
+          transition: transform var(--dur) var(--ease),
+            border-color var(--dur) var(--ease),
+            box-shadow var(--dur) var(--ease);
+        }
+
         .gallery-item:hover {
           transform: translateY(-4px);
-          border-color: rgba(212, 175, 55, 0.4);
-          box-shadow:
-            0 20px 40px rgba(0, 0, 0, 0.5),
-            0 0 30px rgba(212, 175, 55, 0.15);
+          border-color: var(--c-border-strong);
+          box-shadow: var(--shadow-lg), var(--shadow-glow);
         }
 
         .gallery-image {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: transform var(--dur-slow) var(--ease);
         }
 
         .gallery-item:hover .gallery-image {
-          transform: scale(1.08);
+          transform: scale(1.06);
         }
 
         .gallery-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(
-            180deg,
-            transparent 0%,
-            rgba(0, 0, 0, 0.3) 50%,
-            rgba(0, 0, 0, 0.85) 100%
-          );
           display: flex;
           flex-direction: column;
           justify-content: flex-end;
-          padding: 24px;
+          gap: var(--space-2);
+          padding: var(--space-5);
+          background: linear-gradient(
+            180deg,
+            transparent 0%,
+            rgba(11, 10, 7, 0.2) 45%,
+            rgba(11, 10, 7, 0.88) 100%
+          );
           opacity: 0;
-          transition: all 0.4s ease;
+          transition: opacity var(--dur) var(--ease);
         }
 
-        .gallery-item:hover .gallery-overlay {
+        .gallery-item:hover .gallery-overlay,
+        .gallery-item:focus-visible .gallery-overlay {
           opacity: 1;
         }
 
         .gallery-item-title {
-          font-family: 'Playfair Display', serif;
-          font-size: 18px;
-          color: #ffffff;
-          margin-bottom: 8px;
-          transform: translateY(20px);
-          transition: transform 0.4s ease 0.1s;
+          font-family: var(--font-display);
+          font-size: var(--fs-h3);
+          font-weight: 700;
+          color: var(--c-text);
+          line-height: 1.15;
         }
 
-        .gallery-view-btn {
-          font-family: 'Jost', sans-serif;
-          font-size: 12px;
+        .gallery-view {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-1);
+          font-family: var(--font-sans);
+          font-size: var(--fs-xs);
           font-weight: 600;
-          letter-spacing: 1.5px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: #d4af37;
-          transform: translateY(20px);
-          transition: transform 0.4s ease 0.2s;
+          color: var(--c-gold);
         }
 
-        .gallery-item:hover .gallery-item-title,
-        .gallery-item:hover .gallery-view-btn {
-          transform: translateY(0);
-        }
-
-        /* Lightbox */
-        .lightbox {
+        /* ---------- Lightbox ---------- */
+        .gallery-lightbox {
           position: fixed;
           inset: 0;
           z-index: 1000;
-          background: rgba(0, 0, 0, 0.95);
-          backdrop-filter: blur(10px);
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 40px;
-          animation: fadeIn 0.3s ease;
+          padding: clamp(var(--space-4), 4vw, var(--space-7));
+          background: var(--c-scrim);
+          backdrop-filter: blur(10px);
+          animation: gallery-fade var(--dur) var(--ease);
         }
 
-        @keyframes fadeIn {
+        @keyframes gallery-fade {
           from {
             opacity: 0;
           }
@@ -304,69 +454,79 @@ const GallerySection = () => {
           }
         }
 
-        .lightbox-close {
+        .gallery-lb-close {
           position: absolute;
-          top: 30px;
-          right: 30px;
-          width: 50px;
-          height: 50px;
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(212, 175, 55, 0.3);
-          border-radius: 50%;
+          top: clamp(var(--space-3), 3vw, var(--space-6));
+          right: clamp(var(--space-3), 3vw, var(--space-6));
+          width: 48px;
+          height: 48px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #d4af37;
+          border-radius: var(--radius-pill);
+          border: 1px solid var(--c-border-strong);
+          background: var(--c-surface-2);
+          color: var(--c-gold);
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: background var(--dur) var(--ease),
+            border-color var(--dur) var(--ease),
+            color var(--dur) var(--ease);
         }
 
-        .lightbox-close:hover {
-          background: rgba(212, 175, 55, 0.2);
-          transform: rotate(90deg);
+        .gallery-lb-close:hover {
+          background: var(--c-gold-soft);
+          border-color: var(--c-gold);
+          color: var(--c-gold-hover);
         }
 
-        .lightbox-nav {
+        .gallery-lb-nav {
           position: absolute;
           top: 50%;
           transform: translateY(-50%);
-          width: 60px;
-          height: 60px;
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(212, 175, 55, 0.3);
-          border-radius: 50%;
+          width: 56px;
+          height: 56px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #d4af37;
+          border-radius: var(--radius-pill);
+          border: 1px solid var(--c-border-strong);
+          background: var(--c-surface-2);
+          color: var(--c-gold);
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: background var(--dur) var(--ease),
+            border-color var(--dur) var(--ease),
+            color var(--dur) var(--ease);
         }
 
-        .lightbox-nav--prev {
-          left: 30px;
+        .gallery-lb-nav:hover {
+          background: var(--c-gold-soft);
+          border-color: var(--c-gold);
+          color: var(--c-gold-hover);
         }
 
-        .lightbox-nav--next {
-          right: 30px;
+        .gallery-lb-nav--prev {
+          left: clamp(var(--space-2), 3vw, var(--space-6));
         }
 
-        .lightbox-nav:hover {
-          background: rgba(212, 175, 55, 0.2);
-          transform: translateY(-50%) scale(1.1);
+        .gallery-lb-nav--next {
+          right: clamp(var(--space-2), 3vw, var(--space-6));
         }
 
-        .lightbox-content {
-          max-width: 90vw;
-          max-height: 80vh;
+        .gallery-lb-content {
           position: relative;
-          animation: slideUp 0.4s ease;
+          max-width: min(90vw, 1100px);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: var(--space-4);
+          margin: 0;
+          animation: gallery-rise var(--dur-slow) var(--ease-out);
         }
 
-        @keyframes slideUp {
+        @keyframes gallery-rise {
           from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(24px);
           }
           to {
             opacity: 1;
@@ -374,38 +534,38 @@ const GallerySection = () => {
           }
         }
 
-        .lightbox-image {
+        .gallery-lb-image {
+          width: auto;
+          height: auto;
           max-width: 100%;
-          max-height: calc(80vh - 80px);
+          max-height: 76vh;
           object-fit: contain;
-          border-radius: 8px;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+          border-radius: var(--radius-md);
+          border: 1px solid var(--c-border);
+          box-shadow: var(--shadow-lg);
         }
 
-        .lightbox-caption {
-          position: absolute;
-          bottom: -60px;
-          left: 0;
-          right: 0;
+        .gallery-lb-caption {
           text-align: center;
         }
 
-        .lightbox-title {
-          font-family: 'Playfair Display', serif;
-          font-size: 24px;
-          color: #ffffff;
-          margin-bottom: 4px;
+        .gallery-lb-title {
+          font-family: var(--font-display);
+          font-size: var(--fs-h3);
+          color: var(--c-text);
+          margin-bottom: var(--space-1);
         }
 
-        .lightbox-category {
-          font-family: 'Jost', sans-serif;
-          font-size: 14px;
-          color: #d4af37;
-          letter-spacing: 1px;
+        .gallery-lb-category {
+          font-family: var(--font-sans);
+          font-size: var(--fs-sm);
+          font-weight: 600;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
+          color: var(--c-gold);
         }
 
-        /* Responsive */
+        /* ---------- Responsive ---------- */
         @media (max-width: 1024px) {
           .gallery-grid {
             grid-template-columns: repeat(3, 1fr);
@@ -414,50 +574,19 @@ const GallerySection = () => {
         }
 
         @media (max-width: 768px) {
-          .gallery-section {
-            padding: 60px 20px;
-          }
-
           .gallery-grid {
             grid-template-columns: repeat(2, 1fr);
             grid-auto-rows: 200px;
-            gap: 12px;
+            gap: var(--space-3);
           }
 
-          .gallery-item--large {
+          .gallery-cell--large {
             grid-column: span 2;
           }
 
-          .category-filters {
-            gap: 8px;
-          }
-
-          .filter-btn {
-            padding: 10px 20px;
-            font-size: 12px;
-          }
-
-          .lightbox {
-            padding: 20px;
-          }
-
-          .lightbox-close,
-          .lightbox-nav {
+          .gallery-lb-nav {
             width: 44px;
             height: 44px;
-          }
-
-          .lightbox-nav--prev {
-            left: 10px;
-          }
-
-          .lightbox-nav--next {
-            right: 10px;
-          }
-
-          .lightbox-close {
-            top: 10px;
-            right: 10px;
           }
         }
 
@@ -467,22 +596,13 @@ const GallerySection = () => {
             grid-auto-rows: 240px;
           }
 
-          .gallery-item--large {
+          .gallery-cell--large {
             grid-column: span 1;
             grid-row: span 2;
           }
 
-          .gallery-item--medium {
+          .gallery-cell--medium {
             grid-column: span 1;
-          }
-
-          .category-filters {
-            gap: 6px;
-          }
-
-          .filter-btn {
-            padding: 8px 16px;
-            font-size: 11px;
           }
         }
       `}</style>

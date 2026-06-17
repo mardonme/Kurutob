@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import Button from './ui/Button';
+import Icon from './ui/Icon';
 
 const Hero = ({ onOpenReservation }) => {
   const [heroReady, setHeroReady] = useState(false);
@@ -9,215 +11,265 @@ const Hero = ({ onOpenReservation }) => {
   }, []);
 
   return (
-    <section className="hero">
-      <div className={`hero-content ${heroReady ? 'ready' : ''}`}>
-        <span className="hero-eyebrow">Premium Dining Experience</span>
+    <section className="hero" aria-label="Welcome to KURUTOB">
+      <div className="hero-bg" aria-hidden="true" />
+      <div className="hero-scrim" aria-hidden="true" />
+      <span className="hero-glow glow-accent" aria-hidden="true" />
+
+      <div className={`hero-content ${heroReady ? 'is-ready' : ''}`}>
+        <span className="hero-eyebrow">
+          <Icon name="sparkle" size={14} />
+          Authentic Tajik Cuisine
+        </span>
+
         <h1 className="hero-title">KURUTOB</h1>
+
         <p className="hero-subheading">
-          Taste of Tajik Traditions — served with modern elegance in the heart of Tashkent.
+          A taste of Tajik and Central Asian traditions, served with modern
+          elegance in the heart of Tashkent.
         </p>
-        <div className="hero-buttons">
-          <button className="btn-primary" onClick={onOpenReservation}>Book a Table</button>
-          <button className="btn-secondary">View Menu</button>
+
+        <div className="hero-actions">
+          <Button variant="primary" size="lg" onClick={onOpenReservation}>
+            Book a Table
+            <Icon name="arrowRight" size={18} />
+          </Button>
+          <Button variant="secondary" size="lg" as="a" href="#menu">
+            View Menu
+          </Button>
         </div>
+
+        <p className="hero-trust">
+          Since 2010
+          <span className="hero-trust-dot" aria-hidden="true">·</span>
+          3 locations across Tashkent
+        </p>
       </div>
 
-      <div className={`hero-pot-glow ${heroReady ? 'ready' : ''}`}>
-        <span className="hero-pot">🫕</span>
-      </div>
-
-      <div className="scroll-indicator">
-        <div className="scroll-line"></div>
-      </div>
+      <a className="hero-scroll" href="#menu" aria-label="Scroll to explore the menu">
+        <span className="hero-scroll-label" aria-hidden="true">Explore</span>
+        <span className="hero-scroll-line" aria-hidden="true" />
+      </a>
 
       <style jsx>{`
         .hero {
           position: relative;
           min-height: 100vh;
-          height: 100vh;
-          max-height: 900px;
+          min-height: 100svh;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           text-align: center;
-          padding: 120px 24px 80px;
-          background: url('/image.png') no-repeat center center / cover;
+          padding: calc(var(--nav-h) + var(--space-7)) var(--container-pad)
+            var(--space-9);
+          background: var(--c-bg);
           overflow: hidden;
         }
 
-        .hero::before {
-          content: '';
+        .hero-bg {
           position: absolute;
           inset: 0;
-          background: linear-gradient(
-            135deg,
-            rgba(14, 13, 8, 0.85) 0%,
-            rgba(14, 13, 8, 0.65) 40%,
-            rgba(14, 13, 8, 0.75) 70%,
-            rgba(14, 13, 8, 0.9) 100%
-          );
+          background-color: var(--c-bg);
+          background-image: url('/image.png');
+          background-repeat: no-repeat;
+          background-position: center center;
+          background-size: cover;
+          z-index: 0;
+        }
+
+        /* Refined dark gradient scrim — guarantees text contrast.
+           Derived from --c-bg via color-mix so it tracks the theme. */
+        .hero-scrim {
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(
+              180deg,
+              color-mix(in srgb, var(--c-bg) 55%, transparent) 0%,
+              color-mix(in srgb, var(--c-bg) 40%, transparent) 38%,
+              color-mix(in srgb, var(--c-bg) 70%, transparent) 78%,
+              color-mix(in srgb, var(--c-bg) 95%, transparent) 100%
+            ),
+            radial-gradient(
+              130% 90% at 50% 42%,
+              color-mix(in srgb, var(--c-bg) 25%, transparent) 0%,
+              color-mix(in srgb, var(--c-bg) 78%, transparent) 100%
+            );
+          z-index: 1;
+        }
+
+        /* Ambient gold glow for depth (replaces the emoji pot focal) */
+        .hero-glow {
+          width: clamp(360px, 60vw, 720px);
+          height: clamp(360px, 60vw, 720px);
+          left: 50%;
+          bottom: -22%;
+          transform: translateX(-50%);
+          opacity: 0.7;
           z-index: 1;
         }
 
         .hero-content {
-          opacity: 0;
-          transform: translateY(20px);
-          transition: opacity 1s ease, transform 1s ease;
           position: relative;
           z-index: 2;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          max-width: 640px;
+          opacity: 0;
+          transform: translateY(24px);
+          transition:
+            opacity var(--dur-slow) var(--ease-out),
+            transform var(--dur-slow) var(--ease-out);
         }
-
-        .hero-content.ready {
+        .hero-content.is-ready {
           opacity: 1;
           transform: translateY(0);
         }
 
         .hero-eyebrow {
-          font-family: 'Jost', sans-serif;
-          font-size: 11px;
-          letter-spacing: 4px;
-          color: #d4a017;
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-2);
+          font-family: var(--font-sans);
+          font-size: var(--fs-xs);
+          font-weight: 600;
+          letter-spacing: 0.22em;
           text-transform: uppercase;
-          display: inline-block;
-          border: 1px solid rgba(212, 160, 23, 0.3);
-          padding: 5px 16px;
-          margin-bottom: 20px;
+          color: var(--c-gold);
+          background: var(--c-gold-soft);
+          border: 1px solid var(--c-gold-line);
+          border-radius: var(--radius-pill);
+          padding: var(--space-2) var(--space-4);
+          margin-bottom: var(--space-5);
+          backdrop-filter: blur(6px);
         }
 
         .hero-title {
-          font-family: 'Playfair Display', serif;
-          font-weight: 900;
-          font-size: clamp(72px, 14vw, 140px);
-          line-height: 0.9;
-          letter-spacing: 0.02em;
-          color: #f0e6cc;
-          margin-bottom: 24px;
+          font-family: var(--font-display);
+          font-weight: 800;
+          font-size: var(--fs-display);
+          line-height: 0.95;
+          letter-spacing: 0.01em;
+          color: var(--c-text);
+          margin-bottom: var(--space-5);
+          text-shadow: var(--shadow-lg);
         }
 
         .hero-subheading {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(16px, 2.5vw, 22px);
-          font-style: italic;
-          color: rgba(232, 223, 200, 0.65);
-          max-width: 480px;
+          font-family: var(--font-sans);
+          font-size: var(--fs-lg);
+          color: var(--c-text-2);
+          max-width: 30ch;
           line-height: 1.6;
-          margin-bottom: 44px;
+          margin-bottom: var(--space-7);
         }
 
-        .hero-buttons {
+        .hero-actions {
           display: flex;
           flex-direction: row;
-          gap: 16px;
+          gap: var(--space-4);
           justify-content: center;
           flex-wrap: wrap;
         }
 
-        .btn-primary {
-          background: #d4a017;
-          color: #0e0d08;
-          border: none;
-          padding: 13px 28px;
-          font-family: 'Jost', sans-serif;
-          font-weight: bold;
-          font-size: 13px;
-          letter-spacing: 1.5px;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: background 0.3s ease;
-        }
-
-        .btn-primary:hover {
-          background: #e8b42a;
-        }
-
-        .btn-secondary {
-          background: transparent;
-          border: 1.5px solid rgba(232, 223, 200, 0.5);
-          color: #e8dfc8;
-          padding: 13px 28px;
-          font-family: 'Jost', sans-serif;
-          font-weight: bold;
-          font-size: 13px;
-          letter-spacing: 1.5px;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: border-color 0.3s ease, color 0.3s ease;
-        }
-
-        .btn-secondary:hover {
-          border-color: #d4a017;
-          color: #d4a017;
-        }
-
-        .hero-pot-glow {
-          position: absolute;
-          bottom: -30px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 320px;
-          height: 180px;
-          background: radial-gradient(ellipse at center, rgba(212, 160, 23, 0.4) 0%, transparent 70%);
-          display: flex;
+        .hero-trust {
+          display: inline-flex;
           align-items: center;
+          gap: var(--space-2);
+          flex-wrap: wrap;
           justify-content: center;
-          opacity: 0;
-          transition: opacity 0.5s ease 0.5s;
-          pointer-events: none;
+          margin-top: var(--space-6);
+          font-family: var(--font-sans);
+          font-size: var(--fs-sm);
+          color: var(--c-text-3);
+          letter-spacing: 0.02em;
+        }
+        .hero-trust-dot {
+          color: var(--c-gold);
         }
 
-        .hero-pot-glow.ready {
-          opacity: 0.35;
-        }
-
-        .hero-pot {
-          font-size: 120px;
-          filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
-        }
-
-        .scroll-indicator {
+        .hero-scroll {
           position: absolute;
-          bottom: 32px;
+          bottom: var(--space-5);
           left: 50%;
           transform: translateX(-50%);
-          display: flex;
+          z-index: 2;
+          display: inline-flex;
+          flex-direction: column;
           align-items: center;
+          gap: var(--space-2);
+          opacity: 0;
+          transition:
+            opacity var(--dur-slow) var(--ease-out) 400ms,
+            color var(--dur) var(--ease);
+          color: var(--c-text-3);
         }
-
-        .scroll-line {
+        .hero-content.is-ready ~ .hero-scroll {
+          opacity: 1;
+        }
+        .hero-scroll:hover {
+          color: var(--c-gold);
+        }
+        .hero-scroll-label {
+          font-family: var(--font-sans);
+          font-size: var(--fs-xs);
+          font-weight: 600;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+        }
+        .hero-scroll-line {
+          position: relative;
           width: 1px;
           height: 40px;
-          background: linear-gradient(180deg, transparent 0%, #d4a017 100%);
+          background: linear-gradient(180deg, transparent 0%, var(--c-gold) 100%);
+        }
+        .hero-scroll-line::after {
+          content: '';
+          position: absolute;
+          left: 50%;
+          width: 4px;
+          height: 4px;
+          margin-left: -2px;
+          border-radius: 50%;
+          background: var(--c-gold);
+          animation: hero-scroll-dot 2s var(--ease-out) infinite;
+        }
+        @keyframes hero-scroll-dot {
+          0% {
+            opacity: 0;
+            transform: translateY(0);
+          }
+          25% {
+            opacity: 1;
+          }
+          75% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(36px);
+          }
         }
 
-        /* Mobile responsiveness */
         @media (max-width: 640px) {
           .hero {
-            padding: 100px 20px 60px;
+            padding: calc(var(--nav-h) + var(--space-6)) var(--container-pad)
+              var(--space-8);
           }
-
-          .hero-title {
-            font-size: clamp(56px, 18vw, 100px);
-          }
-
-          .hero-buttons {
+          .hero-actions {
             flex-direction: column;
-            align-items: center;
-          }
-
-          .hero-pot {
-            font-size: 80px;
-          }
-
-          .hero-pot-glow {
-            width: 240px;
-            height: 140px;
-          }
-
-          .btn-primary,
-          .btn-secondary {
+            align-items: stretch;
             width: 100%;
-            max-width: 280px;
+            max-width: 320px;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .hero-scroll-line::after {
+            animation: none;
+            opacity: 1;
           }
         }
       `}</style>

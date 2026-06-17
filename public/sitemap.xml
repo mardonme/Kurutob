@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Single-page site: only the homepage is a crawlable URL.
+     In-page anchors (#story, #menu, #locations, #gallery) are fragments,
+     not separate URLs, so they are intentionally omitted. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://kurutob.uz/</loc>
+    <lastmod>2026-06-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://kurutob.uz/image.png</image:loc>
+      <image:title>Kurutob — authentic Tajik cuisine in Tashkent</image:title>
+    </image:image>
+  </url>
+</urlset>

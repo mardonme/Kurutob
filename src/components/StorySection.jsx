@@ -1,151 +1,200 @@
 import FadeIn from './FadeIn';
+import Container from './ui/Container';
+import Button from './ui/Button';
+import Icon from './ui/Icon';
+
+const FEATURES = [
+  { icon: 'clock', label: 'Est. 2010' },
+  { icon: 'utensils', label: 'Hand-torn fatir' },
+  { icon: 'leaf', label: 'Mountain herbs' },
+];
 
 const StorySection = () => {
   return (
-    <section id="story" className="story-section">
-      <div className="story-container">
-        <FadeIn>
-          <div className="story-image">
-            <img src="./picture1.jpg" alt="Kurutob preparation" />
-            <div className="story-image-overlay"></div>
-          </div>
-        </FadeIn>
+    <section id="story" className="story-section" aria-labelledby="story-heading">
+      <span className="glow-accent story-glow" aria-hidden="true" />
 
-        <FadeIn delay={150}>
-          <div className="story-content">
-            <span className="story-eyebrow">Our Heritage</span>
-            <h2 className="story-heading">
-              The Soul of <span className="story-highlight">Tajik Cuisine</span>
-            </h2>
-            <div className="story-underline"></div>
-            <p className="story-text">
-              Kurutob is more than just a dish; it's a centuries-old ritual. Rooted in the mountain villages of Tajikistan, our recipe honours the traditional method of hand-tearing fresh fatir bread and layering it with tangy katyk yogurt, crisp cucumbers, and garden-fresh herbs.
-            </p>
-            <p className="story-text">
-              Every plate at Kurutob tells a story of heritage — from the mountains to your table, we preserve the authentic flavours passed down through generations.
-            </p>
-            <button className="kurutob-btn-primary">Discover Our Heritage</button>
-          </div>
-        </FadeIn>
-      </div>
+      <Container size="wide">
+        <div className="story-grid">
+          <FadeIn className="story-media-col">
+            <figure className="story-figure">
+              <img
+                className="story-image"
+                src="/picture1.jpg"
+                alt="Hand-torn fatir bread layered for a plate of Kurutob"
+                width="800"
+                height="1000"
+                loading="lazy"
+                decoding="async"
+              />
+            </figure>
+          </FadeIn>
+
+          <FadeIn delay={150} className="story-content-col">
+            <div className="story-content">
+              <span className="eyebrow">Our Heritage</span>
+
+              <h2 id="story-heading" className="story-heading">
+                The Soul of <em>Tajik Cuisine</em>
+              </h2>
+
+              <p className="story-text">
+                Kurutob is more than just a dish; it&apos;s a centuries-old ritual.
+                Rooted in the mountain villages of Tajikistan, our recipe honours the
+                traditional method of hand-tearing fresh fatir bread and layering it
+                with tangy katyk yogurt, crisp cucumbers, and garden-fresh herbs.
+              </p>
+              <p className="story-text">
+                Every plate at Kurutob tells a story of heritage — from the mountains
+                to your table, we preserve the authentic Central Asian flavours passed
+                down through generations.
+              </p>
+
+              <ul className="story-features">
+                {FEATURES.map((feature) => (
+                  <li key={feature.label} className="story-chip">
+                    <Icon name={feature.icon} size={16} />
+                    <span>{feature.label}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="story-actions">
+                <Button as="a" href="#menu" variant="secondary">
+                  Explore the Menu
+                  <Icon name="arrowRight" size={16} />
+                </Button>
+              </div>
+            </div>
+          </FadeIn>
+        </div>
+      </Container>
 
       <style jsx>{`
         .story-section {
-          padding: 100px 48px;
-          max-width: 1400px;
-          margin: 0 auto;
-        }
-
-        .story-container {
-          display: grid;
-          grid-template-columns: 1fr 1.2fr;
-          gap: 80px;
-          align-items: center;
-        }
-
-        .story-image {
           position: relative;
-          aspect-ratio: 4/5;
-          background: linear-gradient(145deg, #1a1508, #0e0d08);
-          border: 1px solid rgba(212, 160, 23, 0.2);
+          padding-block: clamp(64px, 10vw, 128px);
           overflow: hidden;
         }
 
-        .story-image img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
+        .story-glow {
+          top: 10%;
+          left: -8%;
+          width: 420px;
+          height: 420px;
+          opacity: 0.7;
         }
 
-        .story-image-overlay {
+        .story-grid {
+          position: relative;
+          z-index: 1;
+          display: grid;
+          grid-template-columns: 0.9fr 1.1fr;
+          gap: clamp(var(--space-6), 6vw, var(--space-9));
+          align-items: center;
+        }
+
+        .story-figure {
+          position: relative;
+          margin: 0;
+          border-radius: var(--radius-lg);
+          padding: var(--space-2);
+          background: linear-gradient(
+            145deg,
+            var(--c-gold-soft),
+            transparent 60%
+          );
+          border: 1px solid var(--c-gold-line);
+        }
+
+        .story-figure::after {
+          content: '';
           position: absolute;
-          inset: 0;
-          background: linear-gradient(135deg, rgba(212, 160, 23, 0.08) 0%, transparent 100%);
+          inset: var(--space-2);
+          border-radius: calc(var(--radius-lg) - var(--space-2));
+          box-shadow: inset 0 0 0 1px var(--c-gold-soft);
           pointer-events: none;
+        }
+
+        .story-image {
+          width: 100%;
+          height: 100%;
+          aspect-ratio: 4 / 5;
+          object-fit: cover;
+          border-radius: calc(var(--radius-lg) - var(--space-2));
+          box-shadow: var(--shadow-lg);
         }
 
         .story-content {
           display: flex;
           flex-direction: column;
-        }
-
-        .story-eyebrow {
-          font-family: 'Jost', sans-serif;
-          font-size: 11px;
-          letter-spacing: 3px;
-          text-transform: uppercase;
-          color: #d4a017;
-          margin-bottom: 16px;
-          display: block;
+          gap: var(--space-4);
+          max-width: 56ch;
         }
 
         .story-heading {
-          font-family: 'Playfair Display', serif;
-          font-size: clamp(32px, 5vw, 48px);
-          line-height: 1.15;
-          margin-bottom: 16px;
-          color: #f0e6cc;
-          font-weight: 400;
+          font-family: var(--font-display);
+          font-size: var(--fs-h2);
+          line-height: 1.1;
+          color: var(--c-text);
+          margin-top: var(--space-1);
         }
 
-        .story-highlight {
+        .story-heading em {
           font-style: italic;
-          color: #d4a017;
-        }
-
-        .story-underline {
-          width: 60px;
-          height: 2px;
-          background: linear-gradient(90deg, #d4a017, transparent);
-          margin-bottom: 32px;
+          color: var(--c-gold);
         }
 
         .story-text {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(16px, 1.8vw, 20px);
-          color: rgba(232, 223, 200, 0.75);
-          line-height: 1.8;
-          margin-bottom: 24px;
+          font-family: var(--font-sans);
+          font-size: var(--fs-lg);
+          color: var(--c-text-2);
+          line-height: 1.7;
         }
 
-        .story-text:last-of-type {
-          margin-bottom: 32px;
+        .story-features {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--space-3);
+          margin-top: var(--space-2);
         }
 
-        @media (max-width: 900px) {
-          .story-section {
-            padding: 80px 24px;
-          }
+        .story-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-2);
+          padding: var(--space-2) var(--space-4);
+          border-radius: var(--radius-pill);
+          background: var(--c-surface-2);
+          border: 1px solid var(--c-border);
+          color: var(--c-text);
+          font-family: var(--font-sans);
+          font-size: var(--fs-sm);
+          font-weight: 500;
+          letter-spacing: 0.01em;
+        }
 
-          .story-container {
+        .story-chip svg {
+          color: var(--c-gold);
+          flex-shrink: 0;
+        }
+
+        .story-actions {
+          margin-top: var(--space-3);
+        }
+
+        @media (max-width: 860px) {
+          .story-grid {
             grid-template-columns: 1fr;
-            gap: 48px;
+            gap: clamp(var(--space-6), 7vw, var(--space-7));
+          }
+
+          .story-content {
+            max-width: 62ch;
           }
 
           .story-image {
-            aspect-ratio: 16/9;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .story-section {
-            padding: 60px 20px;
-          }
-
-          .story-container {
-            gap: 32px;
-          }
-
-          .story-image {
-            display: none;
-          }
-
-          .story-heading {
-            font-size: clamp(28px, 6vw, 36px);
-          }
-
-          .story-text {
-            font-size: 16px;
+            aspect-ratio: 16 / 10;
           }
         }
       `}</style>

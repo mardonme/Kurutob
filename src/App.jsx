@@ -25,13 +25,15 @@ function App() {
 
   return (
     <div className="app-wrapper">
+      <a href="#main" className="skip-link">Skip to content</a>
+
       <Navbar onOpenReservation={openReservation} />
       <Hero onOpenReservation={openReservation} />
 
-      <main>
-        <Suspense fallback={<div className="section-skeleton"></div>}>
+      <main id="main">
+        <Suspense fallback={<div className="section-skeleton" aria-hidden="true"></div>}>
           <LazyStorySection />
-          <LazyMenuSection />
+          <LazyMenuSection onOpenReservation={openReservation} />
           <LazyBranchesSection />
           <LazyGallerySection />
           <LazyCtaBanner />

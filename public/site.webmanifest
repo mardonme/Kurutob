@@ -1,0 +1,19 @@
+{
+  "name": "Kurutob — Authentic Tajik Cuisine",
+  "short_name": "Kurutob",
+  "description": "Authentic Tajik & Central Asian cuisine in Tashkent. Book a table or order delivery.",
+  "lang": "en",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b0a07",
+  "theme_color": "#0b0a07",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "500x500",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

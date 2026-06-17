@@ -1,192 +1,220 @@
 import FadeIn from './FadeIn';
+import Container from './ui/Container';
+import Button from './ui/Button';
+import Icon from './ui/Icon';
+
+const FEATURES = [
+  { icon: 'truck', label: 'Fast Delivery' },
+  { icon: 'package', label: 'Fresh Packaging' },
+  { icon: 'thermometer', label: 'Temperature Control' },
+];
 
 const CtaBanner = () => {
   return (
-    <FadeIn>
-      <div className="cta-container">
-        <div className="cta-content">
-          <h2 className="cta-heading">
-            Bringing Traditions to Your<br />
-            <em className="cta-italic">Doorstep</em>
-          </h2>
-          <p className="cta-subtext">
-            Sharing the warmth of Tajik hospitality! Our lightning-fast delivery service covers all of Tashkent, ensuring your Kurutob arrives fresh, warm, and authentic.
-          </p>
-          <div className="cta-badges">
-            <div className="cta-badge">
-              <span className="badge-emoji">🚀</span>
-              <span className="badge-text">Fast Delivery</span>
-            </div>
-            <div className="cta-badge">
-              <span className="badge-emoji">📦</span>
-              <span className="badge-text">Fresh Packaging</span>
-            </div>
-            <div className="cta-badge">
-              <span className="badge-emoji">❄️</span>
-              <span className="badge-text">Temperature Control</span>
-            </div>
+    <FadeIn as="section" className="cta-section" aria-labelledby="cta-heading">
+      <Container size="default">
+        <div className="cta-banner">
+          <span className="glow-accent cta-glow" aria-hidden="true" />
+
+          <div className="cta-content">
+            <span className="eyebrow cta-eyebrow">
+              <Icon name="truck" size={14} /> Delivery
+            </span>
+            <h2 id="cta-heading" className="cta-heading">
+              Bringing Traditions to Your{' '}
+              <em className="cta-accent">Doorstep</em>
+            </h2>
+            <p className="cta-subtext">
+              Sharing the warmth of Tajik hospitality. Our lightning-fast
+              delivery service covers all of Tashkent, ensuring your Kurutob
+              arrives fresh, warm, and authentic.
+            </p>
+            <ul className="cta-features">
+              {FEATURES.map((feature) => (
+                <li key={feature.label} className="cta-feature">
+                  <span className="cta-feature-icon" aria-hidden="true">
+                    <Icon name={feature.icon} size={18} />
+                  </span>
+                  <span className="cta-feature-label">{feature.label}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="cta-action">
+            <Button
+              as="a"
+              href="tel:+998900940400"
+              variant="primary"
+              size="lg"
+              className="cta-order-btn"
+            >
+              <Icon name="phone" size={16} /> Order Delivery
+            </Button>
+            <p className="cta-phone">
+              or call us at{' '}
+              <a href="tel:+998900940400" className="cta-phone-link">
+                +998 90 094 04 00
+              </a>
+            </p>
           </div>
         </div>
-
-        <div className="cta-action">
-          <button className="cta-button">Order Delivery</button>
-          <p className="cta-phone">
-            or call us at <a href="tel:+998900940400">+998 90 094 04 00</a>
-          </p>
-        </div>
-      </div>
+      </Container>
 
       <style jsx>{`
-        .cta-container {
-          margin: 0 auto;
-          max-width: 1200px;
-          margin-bottom: 100px;
-          padding: 72px 64px;
-          background: linear-gradient(135deg, #1a1508, #0e0d08);
-          border: 1px solid rgba(212, 160, 23, 0.25);
+        .cta-section {
+          padding-block: clamp(48px, 7vw, 88px);
+          position: relative;
+        }
+
+        .cta-banner {
+          position: relative;
+          overflow: hidden;
           display: flex;
           align-items: center;
           justify-content: space-between;
           flex-wrap: wrap;
-          gap: 32px;
+          gap: var(--space-7);
+          padding: clamp(var(--space-6), 5vw, var(--space-9));
+          background: linear-gradient(
+            135deg,
+            var(--c-surface-2),
+            var(--c-surface-1)
+          );
+          border: 1px solid var(--c-gold-line);
+          border-radius: var(--radius-xl);
+          box-shadow: var(--shadow-lg);
+        }
+
+        .cta-glow {
+          width: 420px;
+          height: 420px;
+          top: -160px;
+          right: -120px;
         }
 
         .cta-content {
-          flex: 1;
+          position: relative;
+          z-index: 1;
+          flex: 1 1 320px;
           min-width: 280px;
         }
 
-        .cta-heading {
-          font-family: 'Playfair Display', serif;
-          font-size: clamp(28px, 4vw, 42px);
-          line-height: 1.2;
-          margin-bottom: 8px;
-          color: #f0e6cc;
+        .cta-eyebrow {
+          margin-bottom: var(--space-4);
         }
 
-        .cta-italic {
+        .cta-heading {
+          font-family: var(--font-display);
+          font-size: var(--fs-h2);
+          line-height: 1.12;
+          color: var(--c-text);
+        }
+
+        .cta-accent {
           font-style: italic;
-          color: #d4a017;
+          color: var(--c-gold);
         }
 
         .cta-subtext {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 17px;
-          color: rgba(232, 223, 200, 0.55);
-          margin-top: 16px;
-          max-width: 480px;
-          line-height: 1.7;
+          font-family: var(--font-sans);
+          font-size: var(--fs-lg);
+          color: var(--c-text-2);
+          line-height: 1.6;
+          margin-top: var(--space-4);
+          max-width: 52ch;
         }
 
-        .cta-badges {
+        .cta-features {
           display: flex;
-          flex-direction: row;
-          gap: 24px;
-          margin-top: 24px;
           flex-wrap: wrap;
+          gap: var(--space-3);
+          margin-top: var(--space-6);
         }
 
-        .cta-badge {
-          display: flex;
+        .cta-feature {
+          display: inline-flex;
           align-items: center;
-          gap: 8px;
-          background: rgba(212, 160, 23, 0.1);
-          border: 1px solid rgba(212, 160, 23, 0.2);
-          padding: 8px 16px;
-          border-radius: 20px;
+          gap: var(--space-2);
+          padding: var(--space-2) var(--space-4);
+          background: var(--c-gold-soft);
+          border: 1px solid var(--c-gold-line);
+          border-radius: var(--radius-pill);
         }
 
-        .badge-emoji {
-          font-size: 18px;
+        .cta-feature-icon {
+          display: inline-flex;
+          color: var(--c-gold);
         }
 
-        .badge-text {
-          font-family: 'Jost', sans-serif;
-          font-size: 12px;
-          font-weight: 500;
-          letter-spacing: 1px;
+        .cta-feature-label {
+          font-family: var(--font-sans);
+          font-size: var(--fs-xs);
+          font-weight: 600;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: rgba(232, 223, 200, 0.8);
+          color: var(--c-text-2);
         }
 
         .cta-action {
+          position: relative;
+          z-index: 1;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 12px;
-        }
-
-        .cta-button {
-          background: #d4a017;
-          color: #0e0d08;
-          border: none;
-          padding: 16px 36px;
-          font-family: 'Jost', sans-serif;
-          font-weight: 600;
-          font-size: 14px;
-          letter-spacing: 1.5px;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: background 0.3s ease;
-          white-space: nowrap;
-        }
-
-        .cta-button:hover {
-          background: #e8b42a;
+          gap: var(--space-3);
+          flex: 0 0 auto;
         }
 
         .cta-phone {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 16px;
-          color: rgba(232, 223, 200, 0.6);
+          font-family: var(--font-sans);
+          font-size: var(--fs-sm);
+          color: var(--c-text-3);
+          text-align: center;
         }
 
-        .cta-phone a {
-          color: #d4a017;
-          text-decoration: none;
-          transition: color 0.3s ease;
+        .cta-phone-link {
+          color: var(--c-gold);
+          font-weight: 600;
         }
 
-        .cta-phone a:hover {
-          color: #e8b42a;
+        .cta-phone-link:hover {
+          color: var(--c-gold-hover);
         }
 
         @media (max-width: 900px) {
-          .cta-container {
+          .cta-banner {
             flex-direction: column;
+            align-items: stretch;
             text-align: center;
-            padding: 48px 32px;
           }
 
           .cta-subtext {
-            margin-left: auto;
-            margin-right: auto;
+            margin-inline: auto;
           }
 
-          .cta-badges {
+          .cta-eyebrow,
+          .cta-features {
             justify-content: center;
+          }
+
+          .cta-action {
+            width: 100%;
           }
         }
 
-        @media (max-width: 640px) {
-          .cta-container {
-            padding: 32px 24px;
-            margin-bottom: 60px;
-          }
-
-          .cta-badges {
+        @media (max-width: 560px) {
+          .cta-features {
             flex-direction: column;
             align-items: center;
-            gap: 12px;
           }
 
-          .cta-badge {
+          .cta-feature {
             width: fit-content;
           }
 
-          .cta-button {
+          .cta-order-btn {
             width: 100%;
-            padding: 14px 24px;
           }
         }
       `}</style>

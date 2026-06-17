@@ -1,0 +1,6 @@
+# https://kurutob.uz
+User-agent: *
+Allow: /
+
+# Block nothing — it's a single public marketing page.
+Sitemap: https://kurutob.uz/sitemap.xml

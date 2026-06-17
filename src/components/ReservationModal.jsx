@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import Icon from "./ui/Icon";
 
 // Escape special characters for Telegram MarkdownV2
 function escapeMarkdownV2(text) {
@@ -22,6 +23,91 @@ const ReservationModal = ({ isOpen, onClose }) => {
   // Prevent duplicate submissions
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
+  const modalRef = useRef(null);
+  const firstFieldRef = useRef(null);
+  const previouslyFocusedRef = useRef(null);
+
+  const handleClose = () => {
+    if (!isSubmitting) {
+      setFormData({
+        name: "",
+        phone: "",
+        people: "",
+        date: "",
+        time: "",
+        comment: "",
+      });
+      setErrors({});
+      setSubmitStatus(null);
+      setHasSubmitted(false);
+      document.body.style.overflow = "";
+      onClose();
+    }
+  };
+
+  // Body scroll-lock + focus management + restore focus on close
+  useEffect(() => {
+    if (!isOpen) return;
+
+    previouslyFocusedRef.current = document.activeElement;
+    document.body.style.overflow = "hidden";
+
+    // Focus the first field once the panel mounts
+    const focusTimer = window.setTimeout(() => {
+      firstFieldRef.current?.focus();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(focusTimer);
+      // Restore focus to the element that opened the modal
+      const prev = previouslyFocusedRef.current;
+      if (prev && typeof prev.focus === "function") {
+        prev.focus();
+      }
+    };
+  }, [isOpen]);
+
+  // Escape-to-close + Tab focus trap (document-level keydown)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && !isSubmitting) {
+        e.preventDefault();
+        handleClose();
+        return;
+      }
+
+      if (e.key === "Tab") {
+        const panel = modalRef.current;
+        if (!panel) return;
+
+        const focusable = panel.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        );
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        const active = document.activeElement;
+
+        if (e.shiftKey) {
+          if (active === first || !panel.contains(active)) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else if (active === last || !panel.contains(active)) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, isSubmitting]);
+
   if (!isOpen) return null;
 
   const validateForm = () => {
@@ -37,7 +123,7 @@ const ReservationModal = ({ isOpen, onClose }) => {
       newErrors.phone = "Phone number is required";
     } else {
       // Validate phone number (allows digits, spaces, +, -, parentheses)
-      const phoneRegex = /^[\d\s\+\-\(\)]{10,}$/;
+      const phoneRegex = /^[\d\s+\-()]{10,}$/;
       if (!phoneRegex.test(formData.phone.replace(/\s/g, ""))) {
         newErrors.phone = "Please enter a valid phone number";
       }
@@ -88,13 +174,13 @@ const ReservationModal = ({ isOpen, onClose }) => {
 
     try {
       const text = `
-🚀 New Order
-👤 Name: ${formData.name}
-📞 Phone: ${formData.phone}
-👥 People: ${formData.people}
-📅 Date: ${formData.date}
-⏰ Time: ${formData.time}
-📝 Comment: ${formData.comment || "-"}
+New Reservation
+Name: ${formData.name}
+Phone: ${formData.phone}
+People: ${formData.people}
+Date: ${formData.date}
+Time: ${formData.time}
+Comment: ${formData.comment || "-"}
 `;
 
       const res = await axios.post(
@@ -118,31 +204,6 @@ const ReservationModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleClose = () => {
-    if (!isSubmitting) {
-      setFormData({
-        name: "",
-        phone: "",
-        people: "",
-        date: "",
-        time: "",
-        comment: "",
-      });
-      setErrors({});
-      setSubmitStatus(null);
-      setHasSubmitted(false);
-      document.body.style.overflow = "";
-      onClose();
-    }
-  };
-
-  // Handle escape key to close
-  const handleKeyDown = (e) => {
-    if (e.key === "Escape" && !isSubmitting) {
-      handleClose();
-    }
-  };
-
   // Get today's date for min date attribute
   const today = new Date().toISOString().split("T")[0];
 
@@ -150,173 +211,202 @@ const ReservationModal = ({ isOpen, onClose }) => {
     <div
       className="reservation-overlay"
       onClick={handleClose}
-      onKeyDown={handleKeyDown}
+      role="presentation"
     >
-      <div className="reservation-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="reservation-modal"
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="reservation-title"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
+          type="button"
           className="reservation-close"
           onClick={handleClose}
           disabled={isSubmitting}
-          aria-label="Close modal"
+          aria-label="Close reservation dialog"
         >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
+          <Icon name="close" size={20} />
         </button>
 
         <div className="reservation-header">
-          <h2 className="reservation-title">Book a Table</h2>
+          <span className="reservation-eyebrow">
+            <Icon name="utensils" size={14} />
+            Reservations
+          </span>
+          <h2 id="reservation-title" className="reservation-title">
+            Book a <em>Table</em>
+          </h2>
           <p className="reservation-subtitle">
-            Reserve your dining experience with us
+            Reserve your seat for an authentic Tajik dining experience.
           </p>
         </div>
 
         {submitStatus === "success" ? (
-          <div className="reservation-success">
-            <div className="success-icon">
-              <svg
-                width="64"
-                height="64"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                <path d="M22 4L12 14.01l-3-3" />
-              </svg>
-            </div>
-            <h3>Reservation Submitted!</h3>
-            <p>We'll confirm your booking shortly.</p>
+          <div className="reservation-feedback" role="status" aria-live="polite">
+            <span className="reservation-feedback__icon reservation-feedback__icon--success">
+              <Icon name="checkCircle" size={56} strokeWidth={1.4} />
+            </span>
+            <h3 className="reservation-feedback__title">Reservation Submitted</h3>
+            <p className="reservation-feedback__text">
+              We&rsquo;ll confirm your booking shortly.
+            </p>
           </div>
         ) : submitStatus === "error" ? (
-          <div className="reservation-error">
-            <div className="error-icon">
-              <svg
-                width="64"
-                height="64"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M15 9l-6 6M9 9l6 6" />
-              </svg>
-            </div>
-            <h3>Something went wrong</h3>
-            <p>Please try again or contact us directly.</p>
+          <div
+            className="reservation-feedback"
+            role="alert"
+            aria-live="assertive"
+          >
+            <span className="reservation-feedback__icon reservation-feedback__icon--error">
+              <Icon name="alert" size={56} strokeWidth={1.4} />
+            </span>
+            <h3 className="reservation-feedback__title">Something Went Wrong</h3>
+            <p className="reservation-feedback__text">
+              Please try again or contact us directly.
+            </p>
             <button
               type="button"
-              className="retry-btn"
+              className="btn btn--secondary reservation-retry"
               onClick={() => setSubmitStatus(null)}
             >
               Try Again
             </button>
           </div>
         ) : (
-          <form className="reservation-form" onSubmit={submitReservation}>
-            <div className="form-group">
-              <label htmlFor="name">Name *</label>
+          <form
+            className="reservation-form"
+            onSubmit={submitReservation}
+            noValidate
+          >
+            <div className="reservation-field">
+              <label htmlFor="res-name">Name *</label>
               <input
+                ref={firstFieldRef}
                 type="text"
-                id="name"
+                id="res-name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Your full name"
-                className={errors.name ? "error" : ""}
+                className={errors.name ? "is-invalid" : ""}
                 disabled={isSubmitting}
+                autoComplete="name"
+                aria-invalid={errors.name ? "true" : undefined}
+                aria-describedby={errors.name ? "res-name-error" : undefined}
               />
               {errors.name && (
-                <span className="error-message">{errors.name}</span>
+                <span id="res-name-error" className="reservation-error">
+                  <Icon name="alert" size={13} strokeWidth={1.8} />
+                  {errors.name}
+                </span>
               )}
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="phone">Phone *</label>
+            <div className="reservation-row">
+              <div className="reservation-field">
+                <label htmlFor="res-phone">Phone *</label>
                 <input
                   type="tel"
-                  id="phone"
+                  id="res-phone"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="+998 90 123 45 67"
-                  className={errors.phone ? "error" : ""}
+                  className={errors.phone ? "is-invalid" : ""}
                   disabled={isSubmitting}
+                  autoComplete="tel"
+                  aria-invalid={errors.phone ? "true" : undefined}
+                  aria-describedby={
+                    errors.phone ? "res-phone-error" : undefined
+                  }
                 />
                 {errors.phone && (
-                  <span className="error-message">{errors.phone}</span>
+                  <span id="res-phone-error" className="reservation-error">
+                    <Icon name="alert" size={13} strokeWidth={1.8} />
+                    {errors.phone}
+                  </span>
                 )}
               </div>
 
-              <div className="form-group">
-                <label htmlFor="people">Guests *</label>
+              <div className="reservation-field">
+                <label htmlFor="res-people">Guests *</label>
                 <input
                   type="number"
-                  id="people"
+                  id="res-people"
                   name="people"
                   value={formData.people}
                   onChange={handleChange}
                   placeholder="2"
                   min="1"
                   max="50"
-                  className={errors.people ? "error" : ""}
+                  className={errors.people ? "is-invalid" : ""}
                   disabled={isSubmitting}
+                  aria-invalid={errors.people ? "true" : undefined}
+                  aria-describedby={
+                    errors.people ? "res-people-error" : undefined
+                  }
                 />
                 {errors.people && (
-                  <span className="error-message">{errors.people}</span>
+                  <span id="res-people-error" className="reservation-error">
+                    <Icon name="alert" size={13} strokeWidth={1.8} />
+                    {errors.people}
+                  </span>
                 )}
               </div>
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="date">Date *</label>
+            <div className="reservation-row">
+              <div className="reservation-field">
+                <label htmlFor="res-date">Date *</label>
                 <input
                   type="date"
-                  id="date"
+                  id="res-date"
                   name="date"
                   value={formData.date}
                   onChange={handleChange}
                   min={today}
-                  className={errors.date ? "error" : ""}
+                  className={errors.date ? "is-invalid" : ""}
                   disabled={isSubmitting}
+                  aria-invalid={errors.date ? "true" : undefined}
+                  aria-describedby={errors.date ? "res-date-error" : undefined}
                 />
                 {errors.date && (
-                  <span className="error-message">{errors.date}</span>
+                  <span id="res-date-error" className="reservation-error">
+                    <Icon name="alert" size={13} strokeWidth={1.8} />
+                    {errors.date}
+                  </span>
                 )}
               </div>
 
-              <div className="form-group">
-                <label htmlFor="time">Time *</label>
+              <div className="reservation-field">
+                <label htmlFor="res-time">Time *</label>
                 <input
                   type="time"
-                  id="time"
+                  id="res-time"
                   name="time"
                   value={formData.time}
                   onChange={handleChange}
-                  className={errors.time ? "error" : ""}
+                  className={errors.time ? "is-invalid" : ""}
                   disabled={isSubmitting}
+                  aria-invalid={errors.time ? "true" : undefined}
+                  aria-describedby={errors.time ? "res-time-error" : undefined}
                 />
                 {errors.time && (
-                  <span className="error-message">{errors.time}</span>
+                  <span id="res-time-error" className="reservation-error">
+                    <Icon name="alert" size={13} strokeWidth={1.8} />
+                    {errors.time}
+                  </span>
                 )}
               </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="comment">Comment (optional)</label>
+            <div className="reservation-field">
+              <label htmlFor="res-comment">Comment (optional)</label>
               <textarea
-                id="comment"
+                id="res-comment"
                 name="comment"
                 value={formData.comment}
                 onChange={handleChange}
@@ -328,16 +418,19 @@ const ReservationModal = ({ isOpen, onClose }) => {
 
             <button
               type="submit"
-              className="submit-btn"
+              className="btn btn--primary btn--block reservation-submit"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
-                  <span className="spinner"></span>
+                  <span className="spinner" aria-hidden="true"></span>
                   <span>Submitting...</span>
                 </>
               ) : (
-                "Confirm Reservation"
+                <>
+                  Confirm Reservation
+                  <Icon name="arrowRight" size={16} />
+                </>
               )}
             </button>
           </form>
@@ -349,16 +442,17 @@ const ReservationModal = ({ isOpen, onClose }) => {
           position: fixed;
           inset: 0;
           z-index: 1000;
-          background: rgba(0, 0, 0, 0.85);
+          background: var(--c-scrim);
           backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 20px;
-          animation: fadeIn 0.3s ease;
+          padding: var(--space-5);
+          animation: reservation-fade var(--dur) var(--ease);
         }
 
-        @keyframes fadeIn {
+        @keyframes reservation-fade {
           from {
             opacity: 0;
           }
@@ -370,19 +464,22 @@ const ReservationModal = ({ isOpen, onClose }) => {
         .reservation-modal {
           position: relative;
           width: 100%;
-          max-width: 500px;
-          background: linear-gradient(145deg, #1a180f, #0f0f0f);
-          border: 1px solid rgba(212, 175, 55, 0.2);
-          border-radius: 20px;
-          padding: 40px 32px;
-          animation: slideUp 0.4s ease;
-          box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
+          max-width: 520px;
+          max-height: calc(100vh - var(--space-7));
+          overflow-y: auto;
+          overscroll-behavior: contain;
+          background: var(--c-surface-2);
+          border: 1px solid var(--c-border-strong);
+          border-radius: var(--radius-xl);
+          padding: var(--space-7) var(--space-6);
+          box-shadow: var(--shadow-lg);
+          animation: reservation-rise var(--dur-slow) var(--ease-out);
         }
 
-        @keyframes slideUp {
+        @keyframes reservation-rise {
           from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(24px);
           }
           to {
             opacity: 1;
@@ -392,24 +489,26 @@ const ReservationModal = ({ isOpen, onClose }) => {
 
         .reservation-close {
           position: absolute;
-          top: 20px;
-          right: 20px;
-          width: 44px;
-          height: 44px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(212, 175, 55, 0.2);
-          border-radius: 50%;
-          display: flex;
+          top: var(--space-4);
+          right: var(--space-4);
+          width: 42px;
+          height: 42px;
+          background: var(--c-surface-3);
+          border: 1px solid var(--c-border);
+          border-radius: var(--radius-pill);
+          display: inline-flex;
           align-items: center;
           justify-content: center;
-          color: #d4af37;
+          color: var(--c-text-2);
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: background var(--dur) var(--ease),
+            border-color var(--dur) var(--ease), color var(--dur) var(--ease);
         }
 
         .reservation-close:hover:not(:disabled) {
-          background: rgba(212, 175, 55, 0.15);
-          transform: rotate(90deg);
+          background: var(--c-gold-soft);
+          border-color: var(--c-gold-line);
+          color: var(--c-gold);
         }
 
         .reservation-close:disabled {
@@ -419,245 +518,205 @@ const ReservationModal = ({ isOpen, onClose }) => {
 
         .reservation-header {
           text-align: center;
-          margin-bottom: 32px;
+          margin-bottom: var(--space-6);
+          padding-right: var(--space-6);
+          padding-left: var(--space-6);
+        }
+
+        .reservation-eyebrow {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-2);
+          font-family: var(--font-sans);
+          font-size: var(--fs-xs);
+          font-weight: 600;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+          color: var(--c-gold);
+          margin-bottom: var(--space-3);
         }
 
         .reservation-title {
-          font-family: "Playfair Display", serif;
-          font-size: 28px;
-          color: #ffffff;
+          font-family: var(--font-display);
+          font-size: var(--fs-h3);
+          color: var(--c-text);
           font-weight: 700;
-          margin-bottom: 8px;
-          letter-spacing: 1px;
+          line-height: 1.15;
+        }
+
+        .reservation-title em {
+          font-style: italic;
+          color: var(--c-gold);
         }
 
         .reservation-subtitle {
-          font-family: "Jost", sans-serif;
-          font-size: 14px;
-          color: #888888;
-          letter-spacing: 0.5px;
+          font-family: var(--font-sans);
+          font-size: var(--fs-sm);
+          color: var(--c-text-2);
+          margin-top: var(--space-2);
         }
 
         .reservation-form {
           display: flex;
           flex-direction: column;
-          gap: 20px;
+          gap: var(--space-4);
         }
 
-        .form-row {
+        .reservation-row {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 16px;
+          gap: var(--space-4);
         }
 
-        .form-group {
+        .reservation-field {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: var(--space-2);
+          min-width: 0;
         }
 
-        .form-group label {
-          font-family: "Jost", sans-serif;
-          font-size: 13px;
-          font-weight: 500;
-          color: #d4af37;
-          letter-spacing: 0.5px;
+        .reservation-field label {
+          font-family: var(--font-sans);
+          font-size: var(--fs-xs);
+          font-weight: 600;
+          color: var(--c-text-2);
+          letter-spacing: 0.08em;
           text-transform: uppercase;
         }
 
-        .form-group input,
-        .form-group textarea {
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(212, 175, 55, 0.15);
-          border-radius: 12px;
-          padding: 14px 16px;
-          color: #e8dfc8;
-          font-family: "Jost", sans-serif;
-          font-size: 15px;
-          transition: all 0.3s ease;
+        .reservation-field input,
+        .reservation-field textarea {
+          width: 100%;
+          background: var(--c-surface-3);
+          border: 1px solid var(--c-border);
+          border-radius: var(--radius-md);
+          padding: 13px 15px;
+          color: var(--c-text);
+          font-family: var(--font-sans);
+          font-size: var(--fs-base);
+          transition: border-color var(--dur) var(--ease),
+            background var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
         }
 
-        .form-group input:focus,
-        .form-group textarea:focus {
+        .reservation-field input:focus,
+        .reservation-field textarea:focus {
           outline: none;
-          border-color: #d4af37;
-          background: rgba(212, 175, 55, 0.05);
+          border-color: var(--c-gold);
+          background: var(--c-elevated);
+          box-shadow: 0 0 0 3px var(--c-gold-soft);
         }
 
-        .form-group input.error {
-          border-color: #ff4d4d;
+        .reservation-field input.is-invalid {
+          border-color: var(--c-error);
+        }
+        .reservation-field input.is-invalid:focus {
+          box-shadow: 0 0 0 3px var(--c-error-soft);
         }
 
-        .form-group input:disabled,
-        .form-group textarea:disabled {
-          opacity: 0.5;
+        .reservation-field input:disabled,
+        .reservation-field textarea:disabled {
+          opacity: 0.55;
           cursor: not-allowed;
         }
 
-        .form-group textarea {
-          resize: none;
+        .reservation-field textarea {
+          resize: vertical;
+          min-height: 84px;
         }
 
-        .form-group input::placeholder,
-        .form-group textarea::placeholder {
-          color: rgba(232, 223, 200, 0.4);
+        .reservation-field input::placeholder,
+        .reservation-field textarea::placeholder {
+          color: var(--c-text-3);
         }
 
-        .error-message {
-          font-family: "Jost", sans-serif;
-          font-size: 12px;
-          color: #ff4d4d;
-          margin-top: -4px;
+        .reservation-error {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-1);
+          font-family: var(--font-sans);
+          font-size: var(--fs-xs);
+          color: var(--c-error);
         }
 
-        .submit-btn {
-          margin-top: 8px;
-          background: linear-gradient(135deg, #d4a017, #c9a227);
-          color: #0e0d08;
-          border: none;
-          padding: 16px 24px;
-          border-radius: 12px;
-          font-family: "Jost", sans-serif;
-          font-size: 14px;
-          font-weight: 600;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: all 0.3s ease;
+        .reservation-submit {
+          margin-top: var(--space-2);
+        }
+
+        /* Feedback states (success / error) */
+        .reservation-feedback {
           display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: var(--space-5) 0 var(--space-3);
+        }
+
+        .reservation-feedback__icon {
+          display: inline-flex;
           align-items: center;
           justify-content: center;
-          gap: 12px;
+          margin-bottom: var(--space-4);
         }
 
-        .submit-btn:hover:not(:disabled) {
-          background: linear-gradient(135deg, #e8b42a, #d4a017);
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(212, 160, 23, 0.3);
+        .reservation-feedback__icon--success {
+          color: var(--c-success);
+        }
+        .reservation-feedback__icon--error {
+          color: var(--c-error);
         }
 
-        .submit-btn:disabled {
-          opacity: 0.7;
-          cursor: not-allowed;
-          transform: none;
+        .reservation-feedback__title {
+          font-family: var(--font-display);
+          font-size: var(--fs-h3);
+          color: var(--c-text);
+          margin-bottom: var(--space-2);
         }
 
-        .spinner {
-          width: 18px;
-          height: 18px;
-          border: 2px solid rgba(14, 13, 8, 0.3);
-          border-top-color: #0e0d08;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
+        .reservation-feedback__text {
+          font-family: var(--font-sans);
+          font-size: var(--fs-sm);
+          color: var(--c-text-2);
         }
 
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
+        .reservation-retry {
+          margin-top: var(--space-5);
         }
 
-        /* Success state */
-        .reservation-success,
-        .reservation-error {
-          text-align: center;
-          padding: 20px 0;
-        }
-
-        .success-icon {
-          color: #4ade80;
-          margin-bottom: 20px;
-          animation: scaleIn 0.4s ease;
-        }
-
-        .error-icon {
-          color: #ff4d4d;
-          margin-bottom: 20px;
-        }
-
-        @keyframes scaleIn {
-          from {
-            transform: scale(0);
-            opacity: 0;
-          }
-          to {
-            transform: scale(1);
-            opacity: 1;
-          }
-        }
-
-        .reservation-success h3,
-        .reservation-error h3 {
-          font-family: "Playfair Display", serif;
-          font-size: 24px;
-          color: #ffffff;
-          margin-bottom: 8px;
-        }
-
-        .reservation-success p,
-        .reservation-error p {
-          font-family: "Jost", sans-serif;
-          font-size: 14px;
-          color: #888888;
-        }
-
-        .retry-btn {
-          margin-top: 20px;
-          background: rgba(212, 175, 55, 0.1);
-          color: #d4af37;
-          border: 1px solid rgba(212, 175, 55, 0.3);
-          padding: 12px 24px;
-          border-radius: 8px;
-          font-family: "Jost", sans-serif;
-          font-size: 13px;
-          font-weight: 500;
-          letter-spacing: 0.5px;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
-
-        .retry-btn:hover {
-          background: rgba(212, 175, 55, 0.2);
-        }
-
-        /* Date and time input styling */
-        input[type="date"],
-        input[type="time"] {
+        /* Native date/time picker theming */
+        .reservation-field input[type="date"],
+        .reservation-field input[type="time"] {
           color-scheme: dark;
         }
 
-        input[type="date"]::-webkit-calendar-picker-indicator,
-        input[type="time"]::-webkit-calendar-picker-indicator {
-          filter: invert(1) brightness(0.7);
+        .reservation-field input[type="date"]::-webkit-calendar-picker-indicator,
+        .reservation-field input[type="time"]::-webkit-calendar-picker-indicator {
+          filter: invert(0.7) sepia(1) saturate(3) hue-rotate(5deg);
           cursor: pointer;
         }
 
-        /* Responsive */
         @media (max-width: 640px) {
-          .reservation-modal {
-            padding: 32px 24px;
-            border-radius: 16px;
-          }
-
-          .reservation-title {
-            font-size: 24px;
-          }
-
-          .form-row {
-            grid-template-columns: 1fr;
-            gap: 20px;
-          }
-
           .reservation-overlay {
-            padding: 16px;
+            padding: var(--space-4);
+          }
+
+          .reservation-modal {
+            padding: var(--space-6) var(--space-5);
+            border-radius: var(--radius-lg);
+            max-height: calc(100vh - var(--space-5));
+          }
+
+          .reservation-header {
+            padding-right: var(--space-5);
+            padding-left: var(--space-5);
+          }
+
+          .reservation-row {
+            grid-template-columns: 1fr;
           }
 
           .reservation-close {
-            top: 16px;
-            right: 16px;
-            width: 40px;
-            height: 40px;
+            top: var(--space-3);
+            right: var(--space-3);
           }
         }
       `}</style>

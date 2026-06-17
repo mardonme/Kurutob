@@ -23,7 +23,13 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // Capitalized identifiers are component types (e.g. polymorphic `as: Tag`).
+      // This repo has no eslint-plugin-react, so JSX usage of such identifiers
+      // isn't detected — ignore them as both vars and args.
+      'no-unused-vars': [
+        'error',
+        { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^[A-Z_]' },
+      ],
     },
   },
 ])

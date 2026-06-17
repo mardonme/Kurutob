@@ -2,10 +2,279 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Kurutob Restaurant - Experience the finest Persian-Central Asian cuisine where tradition meets modern elegance." />
-    <title>Kurutob Restaurant</title>
+
+    <!-- ====================================================================
+         PRIMARY SEO
+         NOTE: canonical domain is inferred from the hello@kurutob.uz contact
+         email. If the production domain differs, update every kurutob.uz URL
+         below (canonical, og:url, og:image, sitemap, JSON-LD @id/url/image).
+         ==================================================================== -->
+    <title>Kurutob — Authentic Tajik Cuisine in Tashkent</title>
+    <meta
+      name="description"
+      content="Kurutob serves authentic Tajik & Central Asian cuisine in Tashkent — hand-torn fatir, katyk yogurt, plov, manti and sambusa. Book a table or order delivery across the city."
+    />
+    <meta
+      name="keywords"
+      content="Kurutob, Tajik restaurant Tashkent, Central Asian cuisine, kurutob dish, plov, manti, sambusa, fatir, restaurant Tashkent, book a table Tashkent, food delivery Tashkent"
+    />
+    <meta name="author" content="Kurutob" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="theme-color" content="#0b0a07" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="canonical" href="https://kurutob.uz/" />
+
+    <!-- Local / geo signals -->
+    <meta name="geo.region" content="UZ-TK" />
+    <meta name="geo.placename" content="Tashkent" />
+
+    <!-- Icons & PWA -->
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- ====================================================================
+         OPEN GRAPH (Facebook, Telegram, LinkedIn, etc.)
+         ==================================================================== -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Kurutob" />
+    <meta property="og:title" content="Kurutob — Authentic Tajik Cuisine in Tashkent" />
+    <meta
+      property="og:description"
+      content="A taste of Tajik and Central Asian traditions, served with modern elegance in the heart of Tashkent. Book a table or order delivery."
+    />
+    <meta property="og:url" content="https://kurutob.uz/" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content="https://kurutob.uz/image.png" />
+    <meta property="og:image:secure_url" content="https://kurutob.uz/image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="352" />
+    <meta property="og:image:alt" content="A plate of Kurutob — torn fatir bread with rice and herbs" />
+
+    <!-- ====================================================================
+         TWITTER / X CARD
+         ==================================================================== -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Kurutob — Authentic Tajik Cuisine in Tashkent" />
+    <meta
+      name="twitter:description"
+      content="A taste of Tajik and Central Asian traditions, served with modern elegance in the heart of Tashkent."
+    />
+    <meta name="twitter:image" content="https://kurutob.uz/image.png" />
+    <meta name="twitter:image:alt" content="A plate of Kurutob — torn fatir bread with rice and herbs" />
+
+    <!-- Preload the hero LCP image -->
+    <link rel="preload" as="image" href="/image.png" fetchpriority="high" />
+
+    <!-- Fonts: preconnect + non-blocking load -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600&display=swap"
+    />
+
+    <!-- ====================================================================
+         STRUCTURED DATA (JSON-LD) — Organization, WebSite, Restaurant ×3, Menu
+         Static so non-JS crawlers & social scrapers can read it.
+         TODO: add per-branch "geo" lat/long and real "sameAs" social URLs.
+         ==================================================================== -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://kurutob.uz/#organization",
+          "name": "Kurutob",
+          "url": "https://kurutob.uz/",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://kurutob.uz/logo.png",
+            "width": 500,
+            "height": 500
+          },
+          "image": "https://kurutob.uz/image.png",
+          "description": "Authentic Tajik and Central Asian cuisine in Tashkent, preserving culinary heritage since 2010.",
+          "foundingDate": "2010",
+          "email": "hello@kurutob.uz",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+998-71-234-04-00",
+            "email": "hello@kurutob.uz",
+            "contactType": "customer service",
+            "areaServed": "UZ",
+            "availableLanguage": ["en", "ru", "uz", "tg"]
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://kurutob.uz/#website",
+          "url": "https://kurutob.uz/",
+          "name": "Kurutob",
+          "inLanguage": "en",
+          "publisher": { "@id": "https://kurutob.uz/#organization" }
+        },
+        {
+          "@type": "Restaurant",
+          "@id": "https://kurutob.uz/#restaurant-rustaveli",
+          "name": "Kurutob — Shota Rustaveli (Main Branch)",
+          "url": "https://kurutob.uz/",
+          "image": [
+            "https://kurutob.uz/image.png",
+            "https://kurutob.uz/picture1.jpg"
+          ],
+          "logo": "https://kurutob.uz/logo.png",
+          "description": "Flagship Kurutob restaurant in the heart of Tashkent — elegant dining halls, private VIP rooms and a signature outdoor terrace serving authentic Tajik and Central Asian cuisine.",
+          "parentOrganization": { "@id": "https://kurutob.uz/#organization" },
+          "servesCuisine": ["Tajik", "Central Asian", "Uzbek"],
+          "priceRange": "$$",
+          "currenciesAccepted": "UZS",
+          "paymentAccepted": "Cash, Credit Card",
+          "telephone": "+998-90-094-04-00",
+          "email": "hello@kurutob.uz",
+          "acceptsReservations": "True",
+          "hasMap": "https://www.google.com/maps/search/?api=1&query=Shota+Rustaveli+50+Tashkent",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "50 Shota Rustaveli Street",
+            "addressLocality": "Tashkent",
+            "addressRegion": "Tashkent",
+            "postalCode": "100000",
+            "addressCountry": "UZ"
+          },
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+              "opens": "09:00",
+              "closes": "23:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Saturday", "Sunday"],
+              "opens": "09:00",
+              "closes": "23:59"
+            }
+          ],
+          "hasMenu": {
+            "@type": "Menu",
+            "name": "Kurutob Menu",
+            "inLanguage": "en",
+            "hasMenuSection": {
+              "@type": "MenuSection",
+              "name": "Signature Creations",
+              "hasMenuItem": [
+                {
+                  "@type": "MenuItem",
+                  "name": "Traditional Kurutob",
+                  "description": "Torn flatbread, yogurt, garden herbs, and traditional toppings.",
+                  "offers": { "@type": "Offer", "price": "45000", "priceCurrency": "UZS" }
+                },
+                {
+                  "@type": "MenuItem",
+                  "name": "Crispy Sambusa",
+                  "description": "Flaky oven-fired pastry filled with spiced lamb and spring onions.",
+                  "offers": { "@type": "Offer", "price": "38000", "priceCurrency": "UZS" }
+                },
+                {
+                  "@type": "MenuItem",
+                  "name": "Classic Plov",
+                  "description": "Fragrant long-grain rice, tender lamb, yellow carrots, and cumin.",
+                  "offers": { "@type": "Offer", "price": "55000", "priceCurrency": "UZS" }
+                },
+                {
+                  "@type": "MenuItem",
+                  "name": "Steamed Manti",
+                  "description": "Thin dough filled with hand-chopped beef and steamed to perfection.",
+                  "offers": { "@type": "Offer", "price": "48000", "priceCurrency": "UZS" }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "@type": "Restaurant",
+          "@id": "https://kurutob.uz/#restaurant-amir-temur",
+          "name": "Kurutob — Amir Temur Avenue",
+          "url": "https://kurutob.uz/#locations",
+          "image": "https://kurutob.uz/image.png",
+          "description": "Kurutob in Tashkent's business district with a view of the iconic TV tower — ideal for business lunches and intimate dinners.",
+          "parentOrganization": { "@id": "https://kurutob.uz/#organization" },
+          "servesCuisine": ["Tajik", "Central Asian", "Uzbek"],
+          "priceRange": "$$",
+          "telephone": "+998-72-754-04-00",
+          "acceptsReservations": "True",
+          "hasMap": "https://www.google.com/maps/search/?api=1&query=Amir+Temur+98+Tashkent",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "98 Amir Temur Avenue",
+            "addressLocality": "Tashkent",
+            "addressRegion": "Tashkent",
+            "postalCode": "100000",
+            "addressCountry": "UZ"
+          },
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+              "opens": "09:00",
+              "closes": "23:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Saturday", "Sunday"],
+              "opens": "09:00",
+              "closes": "23:59"
+            }
+          ]
+        },
+        {
+          "@type": "Restaurant",
+          "@id": "https://kurutob.uz/#restaurant-yunusabad",
+          "name": "Kurutob — Yunusabad District",
+          "url": "https://kurutob.uz/#locations",
+          "image": "https://kurutob.uz/image.png",
+          "description": "A cozy, family-friendly Kurutob in northern Tashkent with private event spaces and the same authentic Tajik cuisine.",
+          "parentOrganization": { "@id": "https://kurutob.uz/#organization" },
+          "servesCuisine": ["Tajik", "Central Asian", "Uzbek"],
+          "priceRange": "$$",
+          "telephone": "+998-90-123-45-67",
+          "acceptsReservations": "True",
+          "hasMap": "https://www.google.com/maps/search/?api=1&query=Yunusabad+15+Tashkent",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "15 Yunusabad Street",
+            "addressLocality": "Tashkent",
+            "addressRegion": "Tashkent",
+            "postalCode": "100000",
+            "addressCountry": "UZ"
+          },
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+              "opens": "09:00",
+              "closes": "23:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Saturday", "Sunday"],
+              "opens": "09:00",
+              "closes": "23:59"
+            }
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
