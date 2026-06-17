@@ -3,26 +3,28 @@ import FadeIn from './FadeIn';
 const StorySection = () => {
   return (
     <section id="story" className="story-section">
-      <div className="story-grid">
+      <div className="story-container">
         <FadeIn>
           <div className="story-image">
-            <img src="./picture1.jpg" alt="" />
-            <div className="story-overlay"></div>
+            <img src="./picture1.jpg" alt="Kurutob preparation" />
+            <div className="story-image-overlay"></div>
           </div>
         </FadeIn>
 
         <FadeIn delay={150}>
           <div className="story-content">
+            <span className="story-eyebrow">Our Heritage</span>
             <h2 className="story-heading">
-              The Soul of <span className="story-italic">Tajik Cuisine</span>
+              The Soul of <span className="story-highlight">Tajik Cuisine</span>
             </h2>
+            <div className="story-underline"></div>
             <p className="story-text">
               Kurutob is more than just a dish; it's a centuries-old ritual. Rooted in the mountain villages of Tajikistan, our recipe honours the traditional method of hand-tearing fresh fatir bread and layering it with tangy katyk yogurt, crisp cucumbers, and garden-fresh herbs.
             </p>
             <p className="story-text">
               Every plate at Kurutob tells a story of heritage — from the mountains to your table, we preserve the authentic flavours passed down through generations.
             </p>
-            <button className="story-button">Discover Our Heritage</button>
+            <button className="kurutob-btn-primary">Discover Our Heritage</button>
           </div>
         </FadeIn>
       </div>
@@ -30,11 +32,11 @@ const StorySection = () => {
       <style jsx>{`
         .story-section {
           padding: 100px 48px;
-          max-width: 1200px;
+          max-width: 1400px;
           margin: 0 auto;
         }
 
-        .story-grid {
+        .story-container {
           display: grid;
           grid-template-columns: 1fr 1.2fr;
           gap: 80px;
@@ -44,62 +46,70 @@ const StorySection = () => {
         .story-image {
           position: relative;
           aspect-ratio: 4/5;
-          background: linear-gradient(145deg, #1e1a0e, #2a2010);
+          background: linear-gradient(145deg, #1a1508, #0e0d08);
           border: 1px solid rgba(212, 160, 23, 0.2);
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          overflow: hidden;
         }
 
-        .chef-emoji {
-          font-size: 80px;
+        .story-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
 
-        .story-overlay {
+        .story-image-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(135deg, rgba(212, 160, 23, 0.05) 0%, transparent 100%);
+          background: linear-gradient(135deg, rgba(212, 160, 23, 0.08) 0%, transparent 100%);
           pointer-events: none;
+        }
+
+        .story-content {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .story-eyebrow {
+          font-family: 'Jost', sans-serif;
+          font-size: 11px;
+          letter-spacing: 3px;
+          text-transform: uppercase;
+          color: #d4a017;
+          margin-bottom: 16px;
+          display: block;
         }
 
         .story-heading {
           font-family: 'Playfair Display', serif;
-          font-size: clamp(36px, 5vw, 52px);
-          line-height: 1.1;
-          margin-bottom: 24px;
+          font-size: clamp(32px, 5vw, 48px);
+          line-height: 1.15;
+          margin-bottom: 16px;
           color: #f0e6cc;
+          font-weight: 400;
         }
 
-        .story-italic {
+        .story-highlight {
           font-style: italic;
           color: #d4a017;
         }
 
+        .story-underline {
+          width: 60px;
+          height: 2px;
+          background: linear-gradient(90deg, #d4a017, transparent);
+          margin-bottom: 32px;
+        }
+
         .story-text {
           font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(16px, 2vw, 20px);
-          color: rgba(232, 223, 200, 0.7);
-          line-height: 1.7;
-          margin-bottom: 20px;
+          font-size: clamp(16px, 1.8vw, 20px);
+          color: rgba(232, 223, 200, 0.75);
+          line-height: 1.8;
+          margin-bottom: 24px;
         }
 
-        .story-button {
-          margin-top: 32px;
-          background: #d4a017;
-          color: #0e0d08;
-          border: none;
-          padding: 14px 32px;
-          font-family: 'Jost', sans-serif;
-          font-weight: 600;
-          font-size: 13px;
-          letter-spacing: 1.5px;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: background 0.3s ease;
-        }
-
-        .story-button:hover {
-          background: #e8b42a;
+        .story-text:last-of-type {
+          margin-bottom: 32px;
         }
 
         @media (max-width: 900px) {
@@ -107,9 +117,13 @@ const StorySection = () => {
             padding: 80px 24px;
           }
 
-          .story-grid {
+          .story-container {
             grid-template-columns: 1fr;
             gap: 48px;
+          }
+
+          .story-image {
+            aspect-ratio: 16/9;
           }
         }
 
@@ -118,27 +132,20 @@ const StorySection = () => {
             padding: 60px 20px;
           }
 
-          .story-grid {
+          .story-container {
             gap: 32px;
           }
 
           .story-image {
-            // height: 300px;
-            // aspect-ratio: auto;
             display: none;
-          }
-
-          .chef-emoji {
-            font-size: 60px;
           }
 
           .story-heading {
             font-size: clamp(28px, 6vw, 36px);
           }
 
-          .story-button {
-            width: 100%;
-            padding: 12px 24px;
+          .story-text {
+            font-size: 16px;
           }
         }
       `}</style>
